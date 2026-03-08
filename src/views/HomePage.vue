@@ -1,4 +1,5 @@
 <script setup>
+import AnimeCard from '@/components/AnimeCard.vue'
 const spin = () => alert('Hello')
 </script>
 
@@ -30,6 +31,8 @@ const spin = () => alert('Hello')
             </button>
             </div>
           </div>
+          
+          <AnimeCard loading=""/>
         </section>
       </div>
     </div>
