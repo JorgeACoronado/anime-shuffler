@@ -37,6 +37,13 @@
       <div class="h-72 animate-pulse rounded-2xl bg-[#14B8A6]"></div>
     </div>
 
+    <div v-else-if="error"
+      class="rounded-2xl border border-[#F59E0B]/90 bg-[#F59E0B]/50 p-4 text-black"
+    >
+      <h3 class="text-lg font-semibold">Spin failed</h3>
+      <p class="mt-2 text-sm text-black">{{ error }}</p>  
+    </div>
+
     <div v-else>Done</div>
   </section>
 </template>
