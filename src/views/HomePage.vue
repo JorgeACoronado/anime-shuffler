@@ -1,9 +1,23 @@
 <script setup>
-import {  } from 'vue';
+import { computed } from 'vue';
 import AnimeCard from '@/components/AnimeCard.vue'
 import { useAnimeRoulette } from '@/composables/useAnimeRoulette'
 
-const { anime, loading, error, spin } = useAnimeRoulette()
+const { anime, loading, error, spin, cooldownLeft } = useAnimeRoulette()
+
+const spinDisabled = computed(() => loading.value || cooldownLeft.value > 0)
+
+const spinLabel = computed(() => {
+  if (loading.value) {
+    return 'Spinning...'
+  }
+
+  if (cooldownLeft.value > 0) {
+    return `Cooldown ${cooldownLeft.value}s`
+  }
+
+  return '𖥕 SPIN '
+})
 </script>
 
 <template>
@@ -27,12 +41,19 @@ const { anime, loading, error, spin } = useAnimeRoulette()
               </div>
               <button 
                 type="button" 
-                class="cursor-pointer rounded-full border border-[#14B8A6] bg-[#14B8A6] text-[#0F172A] hover:bg-[#14B8A6]/80 focus:outline-none focus:ring-2 focus:ring-[#14B8A6]/90 px-6 py-3 text-base font-black tracking-wide"
+                :disabled="spinDisabled"
+                class="cursor-pointer rounded-full border border-[#14B8A6] bg-[#14B8A6] text-[#0F172A] hover:bg-[#14B8A6]/80 focus:outline-none focus:ring-2 focus:ring-[#14B8A6]/90 px-6 py-3 text-base font-black tracking-wide disabled:cursor-not-allowed disabled:opacity-60"
                 @click="spin"
               >
-              Spin
+              {{ spinLabel }}
             </button>
             </div>
+            <p
+              v-if="cooldownLeft > 0"
+              class="mt-4 rounded-xl border border-[#14B8A6] bg-[#0F172A] px-3 py-2 text-sm font-semibold text-[#F8FAFC]/80"
+            >
+              Rate-Limited. Tray again in {{ cooldownLeft }}s.
+            </p>
           </div>
           
           <AnimeCard 
