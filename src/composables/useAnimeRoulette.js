@@ -1,6 +1,7 @@
-import { useFetch, useCountdown } from '@vueuse/core'
+import { useFetch, useCountdown, useLocalStorage} from '@vueuse/core'
 import { ref } from 'vue';
 
+const WATCH_LIST_KEY = 'anime-roulette-watchlist'
 const URL = 'https://api.jikan.moe/v4/random/anime'
 const MAX_SAFE_SPIN_ATTEMPTS = 5
 const RETRY_SECONDS = 10
@@ -21,6 +22,8 @@ export function useAnimeRoulette() {
     } = useCountdown(0, {
       interval: 1000,
     })
+
+  const watchList = useLocalStorage(WATCH_LIST_KEY, [])
 
   const spin = async () => {
     if(loading.value || cooldownLeft.value > 0) return
@@ -60,6 +63,7 @@ export function useAnimeRoulette() {
 
         if(!candidateAnime) {
           error.value = 'Jikan returned an empty anime payload. Try spinning again.'
+          return
         }
 
         if(!isAllowedRating(candidateAnime.rating)) {
@@ -76,12 +80,55 @@ export function useAnimeRoulette() {
       loading.value = false
     }
   }
-  
+
+  const addToWatchlist = (animeToAdd) => {
+    if (!animeToAdd?.mal_id) {
+      return
+    }
+
+    const alreadyInWatchlist = watchList.value.some(
+      (watchlistAnime) => watchlistAnime.mal_id === animeToAdd.mal_id,
+    )
+
+    if (alreadyInWatchlist) {
+      return
+    }
+
+    watchList.value.unshift({
+      mal_id: animeToAdd.mal_id,
+      title: animeToAdd.title,
+      score: animeToAdd.score,
+      episodes: animeToAdd.episodes,
+      rating: animeToAdd.rating,
+      url: animeToAdd.url,
+      image:
+        animeToAdd.images?.jpg?.large_image_url ||
+        animeToAdd.images?.jpg?.image_url ||
+        animeToAdd.images?.webp?.large_image_url ||
+        animeToAdd.images?.webp?.image_url ||
+        '',
+    })
+  }
+
+  const removeFromWatchlist = (malID) => {
+    watchList.value = watchList.value.filter(
+      (watchlistAnime) => watchlistAnime.mal_id !== malID
+    )
+  }
+
+  const isInWatchlist = (malID) => {
+    return watchList.value.some((watchlistAnime) => watchlistAnime.mal_id === malID)
+  }
+
   return{
     anime, 
     loading, 
     error,
     spin,
     cooldownLeft,
+    watchList,
+    addToWatchlist,
+    isInWatchlist,
+    removeFromWatchlist,
   }
 }
