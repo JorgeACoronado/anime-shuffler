@@ -44,6 +44,10 @@
       <p class="mt-2 text-sm text-black">{{ error }}</p>  
     </div>
 
+    <div v-else-if="anime">
+      <pre>{{ anime }}</pre>
+    </div>
+
     <div v-else>Done</div>
   </section>
 </template>
